@@ -227,4 +227,4 @@ fig.update_layout(
 
 
 
-fig.write_html("fund_performance.html", include_plotlyjs="cdn") #To output as HTML
+fig.write_html("output/fund_performance.html", include_plotlyjs="cdn") #To output as HTML
