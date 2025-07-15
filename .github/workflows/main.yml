@@ -25,7 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install plotly pandas python-dateutil yfinance requests
-      - name: 
+      - name: Run script
         run: python3 newDeal.py
 
       - name: Deploy to Github Pages
