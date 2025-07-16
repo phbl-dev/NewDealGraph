@@ -7,7 +7,6 @@ import json
 from plotly.utils import PlotlyJSONEncoder
 import requests
 import yfinance as yf
-import pandas as pd
 
 
 class FundReturn(TypedDict):
@@ -51,9 +50,6 @@ def get_data_yf(fund_id) -> List[FundReturn]:
 def generate_graph(show_adjusted=False):
     pmindi_data = get_data_mf(1198)
     nasdaq_data = get_data_yf("QQQ")
-
-    print(pmindi_data)
-
     def filter_by_timespan(data, timespan: str) -> list[FundReturn]:
         """Filtrering af data med måneder. Måneder angives i hele tal og afsluttes med "M". F.eks. vil man skrive "6M", hvis man skal bruges 6 måneder."""
         today = date.today()
@@ -285,8 +281,6 @@ with open("regular.json", "w",encoding="UTF-8") as f:
 with open("adjusted.json", "w",encoding="UTF-8") as f:
     json.dump(fig_adjusted.to_plotly_json(), f, cls=PlotlyJSONEncoder)
 
-import json
-from plotly.utils import PlotlyJSONEncoder
 
 # Serialize figures to JSON strings
 fig_regular_json = json.dumps(fig_regular.to_plotly_json(), cls=PlotlyJSONEncoder)
