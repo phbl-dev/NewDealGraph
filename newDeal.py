@@ -7,11 +7,6 @@ import json
 from plotly.utils import PlotlyJSONEncoder
 import requests
 import yfinance as yf
-import locale
-
-locale.getlocale()
-
-locale.setlocale(locale.LC_TIME, "da_DK")
 
 
 class FundReturn(TypedDict):
