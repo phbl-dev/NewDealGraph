@@ -284,3 +284,76 @@ with open("regular.json", "w",encoding="UTF-8") as f:
 
 with open("adjusted.json", "w",encoding="UTF-8") as f:
     json.dump(fig_adjusted.to_plotly_json(), f, cls=PlotlyJSONEncoder)
+
+import json
+from plotly.utils import PlotlyJSONEncoder
+
+# Serialize figures to JSON strings
+fig_regular_json = json.dumps(fig_regular.to_plotly_json(), cls=PlotlyJSONEncoder)
+fig_adjusted_json = json.dumps(fig_adjusted.to_plotly_json(), cls=PlotlyJSONEncoder)
+
+html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fund Performance Graphs</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        #button-container {{
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }}
+
+        #button-container button {{
+            padding: 8px 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }}
+
+        #button-container button:hover {{
+            background-color: #0056b3;
+        }}
+
+        #graph {{
+            width: 100%;
+            max-width: 1280px;
+            margin: auto;
+        }}
+    </style>
+</head>
+<body>
+    <div id="button-container">
+        <button onclick="loadGraph('regular')">Regular View</button>
+        <button onclick="loadGraph('adjusted')">Adjusted View</button>
+    </div>
+
+    <div id="graph"></div>
+
+    <script>
+        const graphs = {{
+            regular: {fig_regular_json},
+            adjusted: {fig_adjusted_json}
+        }};
+
+        function loadGraph(view) {{
+            const graphData = graphs[view];
+            Plotly.newPlot('graph', graphData.data, graphData.layout || {{}});
+        }}
+
+        // Load default view
+        loadGraph('regular');
+    </script>
+</body>
+</html>
+"""
+
+with open("fund_performance_toggle.html", "w") as f:
+    f.write(html_content)
