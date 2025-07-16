@@ -36,10 +36,14 @@ jobs:
           pip install plotly pandas python-dateutil yfinance requests
       - name: Run script
         run: python3 newDeal.py
+      
+      - name: List files before deploy
+        run: ls -l
+
 
       - name: Deploy to Github Pages
         uses: peaceiris/actions-gh-pages@v3
         with: 
           github_token: ${{ secrets.GH_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./
+          publish_dir: .
