@@ -7,6 +7,11 @@ import json
 from plotly.utils import PlotlyJSONEncoder
 import requests
 import yfinance as yf
+import locale
+
+locale.getlocale()
+
+locale.setlocale(locale.LC_TIME, "da_DK")
 
 
 class FundReturn(TypedDict):
@@ -50,6 +55,7 @@ def get_data_yf(fund_id) -> List[FundReturn]:
 def generate_graph(show_adjusted=False):
     pmindi_data = get_data_mf(1198)
     nasdaq_data = get_data_yf("QQQ")
+
     def filter_by_timespan(data, timespan: str) -> list[FundReturn]:
         """Filtrering af data med måneder. Måneder angives i hele tal og afsluttes med "M". F.eks. vil man skrive "6M", hvis man skal bruges 6 måneder."""
         today = date.today()
@@ -95,6 +101,40 @@ def generate_graph(show_adjusted=False):
             pct_str = ""
         return pct_str
 
+    from calendar import month_name
+
+    danish_months = [
+        "",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "maj",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "okt",
+        "nov",
+        "dec",
+    ]
+
+    def format_danish_month_labels(data):
+        """Return tickvals and Danish month labels for the x-axis"""
+        tickvals = []
+        ticktext = []
+        seen = set()
+
+        for item in data:
+            dt = item["date_obj"]
+            ym = (dt.year, dt.month)
+            if ym not in seen:
+                seen.add(ym)
+                tickvals.append(dt)
+                ticktext.append(f"{danish_months[dt.month]} {dt.year}")
+
+        return tickvals, ticktext
+
     def calculate_percentage(values):
         """Udregn percentvis ændring siden start af periode"""
         start_value = values[0]
@@ -110,7 +150,7 @@ def generate_graph(show_adjusted=False):
         fill_mode = None
         if label == "PMINDI.CO":
             fill_mode = "tozeroy"
-            fill_color = f"rgba(128, 0, 128, 0.3)"  # purple with 30% opacity
+            fill_color = "rgba(128, 0, 128, 0.3)"  # purple with 30% opacity
 
         fig.add_trace(
             go.Scatter(
@@ -223,6 +263,7 @@ def generate_graph(show_adjusted=False):
             }
         )
 
+    tickvals, ticktext = format_danish_month_labels(pmindi_data)
     fig.update_layout(
         updatemenus=[
             {
@@ -245,6 +286,12 @@ def generate_graph(show_adjusted=False):
                 # optionally add spacing between buttons by adding spaces in labels
             },
         ],
+        xaxis=dict(
+            tickmode="array",
+            tickvals=tickvals,
+            ticktext=ticktext,
+            tickangle=-45,
+        ),
         yaxis={"title": "Afkast i %", "ticksuffix": "%", "hoverformat": ".2f"},
         hovermode="x unified",
         legend={
@@ -275,10 +322,10 @@ div_adjusted = to_html(
     fig_adjusted, full_html=False, include_plotlyjs=False, div_id="graph-adjusted"
 )
 
-with open("regular.json", "w",encoding="UTF-8") as f:
+with open("regular.json", "w", encoding="UTF-8") as f:
     json.dump(fig_regular.to_plotly_json(), f, cls=PlotlyJSONEncoder)
 
-with open("adjusted.json", "w",encoding="UTF-8") as f:
+with open("adjusted.json", "w", encoding="UTF-8") as f:
     json.dump(fig_adjusted.to_plotly_json(), f, cls=PlotlyJSONEncoder)
 
 
