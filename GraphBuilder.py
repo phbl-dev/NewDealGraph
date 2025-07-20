@@ -1,0 +1,160 @@
+import json
+from typing import List
+from DataProcessing import DataProcessing as DP
+import plotly.graph_objects as go
+from FundReturn import FundReturn
+
+
+
+
+class GraphBuilder:
+    @staticmethod
+    def format_dates(data: List[FundReturn]): 
+        """Return tickvals and Danish month labels for the x-axis"""
+        danish_months = [
+            "",
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "maj",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "okt",
+            "nov",
+            "dec",
+        ]
+
+        tickvals = []
+        ticktext = []
+        seen = set()
+
+        for item in data:
+            dt = item["date_obj"]
+            ym = (dt.year, dt.month)
+            if ym not in seen:
+                seen.add(ym)
+                tickvals.append(dt)
+                ticktext.append(f"{danish_months[dt.month]} {dt.year}")
+
+        return tickvals, ticktext
+
+    @staticmethod
+    def add_fund_trace(fig, data, label, color, show_dividends=False, visible=False):
+        dates = [item["date_obj"] for item in data]
+        values = [item["nav"] for item in data]
+        dividends = [item["dividend"] for item in data]
+        values_pct = DP.calculate_percentage(values)
+
+        fill_color = None
+        fill_mode = None
+        if label == "PMINDI.CO":
+            fill_mode = "tozeroy"
+            fill_color = "rgba(128, 0, 128, 0.3)"  # purple with 30% opacity
+
+        fig.add_trace(
+            go.Scatter(
+                x=dates,
+                y=values_pct,
+                mode="lines",
+                name=label,
+                opacity=0.9,
+                line=dict(color=color),
+                fill=fill_mode,
+                fillcolor=fill_color,
+                visible=visible,
+            )
+        )
+        if show_dividends:
+            div_x = [d for d, div in zip(dates, dividends) if div > 0]
+            div_y = [pct for pct, div in zip(values_pct, dividends) if div > 0]
+            div_text = [
+                f"Årligt udbytte\nDato: {item['date_obj'].strftime('%Y-%m-%d')}\nUdbytte: {item['dividend']:.2f} DKK"
+                for item in data
+                if item["dividend"] > 0
+            ]
+
+        else:
+            div_x, div_y, div_text = [], [], []
+
+        fig.add_trace(
+            go.Scatter(
+                x=div_x,
+                y=div_y,
+                text=div_text,
+                mode="markers",
+                textposition="top center",
+                name=f"{label} Udbytte",
+                marker={"color": f"{color}", "size": 16, "symbol": "diamond"},
+                visible=visible and show_dividends,
+                hoverinfo="text",
+            )
+        )
+
+    @staticmethod
+    def build_html(datasource_one: json, datasource_two: json):
+        '''Build Graph String'''
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Fund Performance Graphs</title>
+            <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+            <style>
+                #button-container {{
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                    padding: 10px;
+                }}
+
+                #button-container button {{
+                    padding: 8px 16px;
+                    background-color: #007BFF;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-family: Arial, sans-serif;
+                }}
+
+                #button-container button:hover {{
+                    background-color: #0056b3;
+                }}
+
+                #graph {{
+                    width: 100%;
+                    max-width: 1280px;
+                    margin: auto;
+                }}
+            </style>
+        </head>
+        <body>
+            <div id="button-container">
+                <button onclick="loadGraph('regular')">Regular View</button>
+                <button onclick="loadGraph('adjusted')">Adjusted View</button>
+            </div>
+
+            <div id="graph"></div>
+
+            <script>
+                const graphs = {{
+                    regular: {datasource_one},
+                    adjusted: {datasource_two}
+                }};
+
+                function loadGraph(view) {{
+                    const graphData = graphs[view];
+                    Plotly.newPlot('graph', graphData.data, graphData.layout || {{}});
+                }}
+
+                // Load default view
+                loadGraph('regular');
+            </script>
+        </body>
+        </html>
+        """
