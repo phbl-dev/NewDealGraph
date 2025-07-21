@@ -13,8 +13,6 @@ class DataProcessing:
 
     @staticmethod
     def calculate_rise(label, data: List[FundReturn]):
-        print(f"calculate_rise called with data type: {type(data)}")
-
         pm_filtered = DataProcessing.filter_by_timespan(data, label)
         if pm_filtered:
             start_val = pm_filtered[0]["nav"]
@@ -33,7 +31,6 @@ class DataProcessing:
         F.eks. vil man skrive "6M", hvis man skal bruge 6 måneder.
         """
         today = date.today()
-        print(f"filter_by_timespan called with data type: {type(data)}")
         for item in data:
             print(item)
             item["date_obj"] = datetime.strptime(item["org_date"], "%Y-%m-%d").date()
@@ -51,18 +48,16 @@ class DataProcessing:
 
     @staticmethod
     def calculate_adjusted(data):
-        # TODO: Find korrekt formel for dette?
         """Udregn adjusted close inkl. udbytte"""
         if not data:
             return []
 
         adjusted = [data[0]["nav"]]
         for k in range(1, len(data)):
-            prev_adj = adjusted[-1]
             nav_today = data[k]["nav"]
             nav_yesterday = data[k - 1]["nav"]
             dividend_today = data[k]["dividend"]
-            new_adj = prev_adj * ((nav_today + dividend_today) / nav_yesterday)
+            new_adj = nav_yesterday * (nav_today / (nav_today - dividend_today))
             adjusted.append(new_adj)
 
         return adjusted
