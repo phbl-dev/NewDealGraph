@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import List
-from FundReturn import FundReturn
+from src.FundReturn import FundReturn
 from dateutil.relativedelta import relativedelta
 
 
@@ -32,7 +32,6 @@ class DataProcessing:
         """
         today = date.today()
         for item in data:
-            print(item)
             item["date_obj"] = datetime.strptime(item["org_date"], "%Y-%m-%d").date()
 
         t = timespan.upper()
@@ -48,16 +47,15 @@ class DataProcessing:
 
     @staticmethod
     def calculate_adjusted(data):
-        """Udregn adjusted close inkl. udbytte"""
+        """Calculate adjusted close including dividends (forward approach)"""
         if not data:
             return []
 
-        adjusted = [data[0]["nav"]]
-        for k in range(1, len(data)):
-            nav_today = data[k]["nav"]
-            nav_yesterday = data[k - 1]["nav"]
-            dividend_today = data[k]["dividend"]
-            new_adj = nav_yesterday * (nav_today / (nav_today - dividend_today))
-            adjusted.append(new_adj)
-
+        dividend = 0
+        adjusted = []
+        for point in data:
+            nav = point.get("nav", 0) or 0
+            if point.get("dividend", 0) > 0:
+                dividend = point.get("dividend", 0)
+            adjusted.append(nav + dividend)
         return adjusted

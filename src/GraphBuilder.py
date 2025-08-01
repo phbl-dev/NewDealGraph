@@ -1,8 +1,7 @@
 import json
 from typing import List
-from DataProcessing import DataProcessing as DP
 import plotly.graph_objects as go
-from FundReturn import FundReturn
+from src.FundReturn import FundReturn
 
 
 
@@ -46,22 +45,23 @@ class GraphBuilder:
         dates = [item["date_obj"] for item in data]
         values = [item["nav"] for item in data]
         dividends = [item["dividend"] for item in data]
-        values_pct = DP.calculate_percentage(values)
 
         fill_color = None
         fill_mode = None
+        line_color = color
         if label == "PMINDI.CO":
-            fill_mode = "tozeroy"
-            fill_color = "rgba(128, 0, 128, 0.3)"  # purple with 30% opacity
+            line_color = "rgba(128, 0, 128, 1)"   # solid purple line
+            fill_mode = "tozeroy"                  # fill area to zero line
+            fill_color = "rgba(128, 0, 128, 0.3)" # translucent purple fill
 
         fig.add_trace(
             go.Scatter(
                 x=dates,
-                y=values_pct,
+                y=values,
                 mode="lines",
                 name=label,
                 opacity=0.9,
-                line=dict(color=color),
+                line=dict(color=line_color),
                 fill=fill_mode,
                 fillcolor=fill_color,
                 visible=visible,
@@ -69,13 +69,12 @@ class GraphBuilder:
         )
         if show_dividends:
             div_x = [d for d, div in zip(dates, dividends) if div > 0]
-            div_y = [pct for pct, div in zip(values_pct, dividends) if div > 0]
+            div_y = [pct for pct, div in zip(values, dividends) if div > 0]
             div_text = [
                 f"Årligt udbytte\nDato: {item['date_obj'].strftime('%Y-%m-%d')}\nUdbytte: {item['dividend']:.2f} DKK"
                 for item in data
                 if item["dividend"] > 0
             ]
-
         else:
             div_x, div_y, div_text = [], [], []
 

@@ -1,12 +1,10 @@
 import json
 from typing import List, Optional
 import plotly.graph_objects as go
+
 from plotly.utils import PlotlyJSONEncoder
 
-from DataCollector import DataCollector as DC
-from DataProcessing import DataProcessing as DP
-from FundReturn import FundReturn
-from GraphBuilder import GraphBuilder as GB
+from src import DataCollector as DC, DataProcessing as DP, FundReturn, GraphBuilder as GB
 
 
 def generate_graph(
@@ -35,17 +33,35 @@ def generate_graph(
 
         if show_adjusted:
             pm_adjusted = DP.calculate_adjusted(pm_filtered)
+            pm_plot = [
+                {**item, "nav": adj} for item, adj in zip(pm_filtered, pm_adjusted)
+            ]
             ndx_adjusted = DP.calculate_adjusted(ndx_filtered)
-            for j, adj in enumerate(pm_adjusted):
-                pm_filtered[j]["nav"] = adj
-            for j, adj in enumerate(ndx_adjusted):
-                ndx_filtered[j]["nav"] = adj
+
+            ndx_plot = [
+                {**item, "nav": adj} for item, adj in zip(ndx_filtered, ndx_adjusted)
+            ]
+
+            ndx_navs = [item["nav"] for item in ndx_plot]
+            ndx_pct = DP.calculate_percentage(ndx_navs)
+            ndx_pct_plot = [
+                {**item, "nav": pct} for item, pct in zip(ndx_plot, ndx_pct)
+            ]
 
             GB.add_fund_trace(
                 fig,
-                pm_filtered,
+                pm_plot,
                 "PMINDI.CO",
                 "purple",
+                show_dividends=False,
+                visible=(label == "12M"),
+            )
+
+            GB.add_fund_trace(
+                fig,
+                ndx_pct_plot,
+                "NASDAQ",
+                "black",
                 show_dividends=False,
                 visible=(label == "12M"),
             )
@@ -59,14 +75,20 @@ def generate_graph(
                 show_dividends=True,
                 visible=(label == "12M"),
             )
-        GB.add_fund_trace(
-            fig,
-            ndx_filtered,
-            "NASDAQ",
-            "green",
-            show_dividends=False,
-            visible=(label == "12M"),
-        )
+
+            ndx_navs = [item["nav"] for item in ndx_filtered]
+            ndx_pct = DP.calculate_percentage(ndx_navs)
+            ndx_pct_plot = [
+                {**item, "nav": pct} for item, pct in zip(ndx_filtered, ndx_pct)
+            ]
+            GB.add_fund_trace(
+                fig,
+                ndx_pct_plot,
+                "NASDAQ",
+                "black",
+                show_dividends=False,
+                visible=(label == "12M"),
+            )
 
     buttons = []
     for i, label in enumerate(time_labels):
@@ -84,13 +106,6 @@ def generate_graph(
                 "method": "update",
                 "args": [
                     {"visible": visibility},
-                    {
-                        "yaxis": {
-                            "title": "Afkast i %",
-                            "ticksuffix": "%",
-                            "hoverformat": ".2f",
-                        },
-                    },
                 ],
             }
         )
@@ -123,8 +138,15 @@ def generate_graph(
             tickvals=tickvals,
             ticktext=ticktext,
             tickangle=-45,
+            showgrid=False,
         ),
-        yaxis={"title": "Afkast i %", "ticksuffix": "%", "hoverformat": ".2f"},
+        yaxis={
+            "title": "Kurs",
+            "hoverformat": ".2f",
+            "showgrid": False,
+            "side": "right",
+        },
+        plot_bgcolor="white",
         hovermode="x unified",
         legend={
             "orientation": "h",
@@ -144,20 +166,18 @@ def generate_graph(
     return fig
 
 
-fig_regular = generate_graph(DC.get_data_mf("1198"), DC.get_data_yf("QQQ"), False)
-fig_adjusted = generate_graph(DC.get_data_mf("1198"), DC.get_data_yf("QQQ"), True)
+if __name__ == "__main__":
+    fig_regular = generate_graph(DC.get_data_mf("1198"), DC.get_data_yf("QQQ"), False)
+    fig_adjusted = generate_graph(DC.get_data_mf("1198"), DC.get_data_yf("QQQ"), True)
 
-with open("regular.json", "w", encoding="UTF-8") as f:
-    json.dump(fig_regular.to_plotly_json(), f, cls=PlotlyJSONEncoder)
+    with open("regular.json", "w", encoding="UTF-8") as f:
+        json.dump(fig_regular.to_plotly_json(), f, cls=PlotlyJSONEncoder)
 
-with open("adjusted.json", "w", encoding="UTF-8") as f:
-    json.dump(fig_adjusted.to_plotly_json(), f, cls=PlotlyJSONEncoder)
+    with open("adjusted.json", "w", encoding="UTF-8") as f:
+        json.dump(fig_adjusted.to_plotly_json(), f, cls=PlotlyJSONEncoder)
 
+    fig_regular_json = json.dumps(fig_regular.to_plotly_json(), cls=PlotlyJSONEncoder)
+    fig_adjusted_json = json.dumps(fig_adjusted.to_plotly_json(), cls=PlotlyJSONEncoder)
 
-# Serialize figures to JSON strings
-fig_regular_json = json.dumps(fig_regular.to_plotly_json(), cls=PlotlyJSONEncoder)
-fig_adjusted_json = json.dumps(fig_adjusted.to_plotly_json(), cls=PlotlyJSONEncoder)
-
-
-with open("fund_performance_toggle.html", "w", encoding="UTF-8") as f:
-    f.write(GB.build_html(fig_regular_json, fig_adjusted_json))
+    with open("fund_performance_toggle.html", "w", encoding="UTF-8") as f:
+        f.write(GB.build_html(fig_regular_json, fig_adjusted_json))
