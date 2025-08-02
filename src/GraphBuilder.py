@@ -218,8 +218,8 @@ class GraphBuilder:
         <body>
           <div id="page-container">
             <div id="button-container">
-              <button onclick="loadGraph('regular')">Regular View</button>
-              <button onclick="loadGraph('adjusted')">Adjusted View</button>
+              <button onclick="loadGraph('regular')">Inkl. udbytte</button>
+              <button onclick="loadGraph('adjusted')">Uden udbytte</button>
             </div>
 
             <div id="graph-wrapper">
@@ -239,7 +239,7 @@ class GraphBuilder:
                 const layout = Object.assign({{}}, graphData.layout || {{}}, {{
                     autosize: true,
                     height: 600,
-                    dragmode: 'pan',
+                    dragmode: false,
                     plot_bgcolor: 'rgba(0,0,0,0)',
                     paper_bgcolor: 'rgba(0,0,0,0)'
                 }});
