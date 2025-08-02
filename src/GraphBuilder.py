@@ -146,7 +146,7 @@ class GraphBuilder:
         return fig
 
     @staticmethod
-    def build_html(datasource_one: json, datasource_two: json):
+    def build_html(datasource_one: str, datasource_two: str):
         """Build Graph String with responsive 100% width and max 600px height"""
         return f"""
         <!DOCTYPE html>
@@ -156,100 +156,114 @@ class GraphBuilder:
             <title>Fund Performance Graphs</title>
             <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
             <style>
-                body {{
-                    margin: 0;
-                    font-family: Arial, sans-serif;
-                }}
-                #button-container {{
-                    display: flex;
-                    justify-content: flex-start;
-                    position: relative;
-                    left:90px;
-                    top: 60px;
-                    z-index: 1;
-                    gap: 10px;
-                    margin: 0;
-                    padding: 10px;
-                }}
-                #button-container button {{
-                    padding: 8px 16px;
-                    background-color: #007BFF;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 16px;
-                }}
-                #button-container button:hover {{
-                    background-color: #0056b3;
-                }}
-                #graph-wrapper {{
-                    width: 100%;
-                    max-width: 100%;
-                    margin: auto;
-                    box-sizing: border-box;
-                    padding: 10px;
-                }}
+              body {{
+                margin: 0;
+                font-family: Arial, sans-serif;
+              }}
+
+              #page-container {{
+                max-width: 1280px;
+                max-height: 600px;
+                margin: 0 auto;
+                position: relative;
+              }}
+
+              #button-container {{
+                position: absolute;
+                top: 90px;
+                left: 80px;
+                width: 100%;
+                display: inline;
+                justify-content: flex-start;
+                gap: 10px;
+                padding: 10px;
+                box-sizing: border-box;
+                z-index: 1;
+              }}
+
+              #button-container button {{
+                padding: 8px 16px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+              }}
+
+              #button-container button:hover {{
+                background-color: #0056b3;
+              }}
+
+              #graph-wrapper {{
+                width: 100%;
+                padding: 10px;
+                box-sizing: border-box;
+                margin-top: 110px;
+              }}
+
+              #graph {{
+                width: 100% !important;
+                height: 600px;
+                max-height: 600px;
+              }}
+
+              @media (max-width: 700px) {{
                 #graph {{
-                    width: 100% !important;
-                    height: 600px;
-                    max-height: 600px;
+                  height: 400px;
                 }}
+              }}
             </style>
         </head>
         <body>
+          <div id="page-container">
             <div id="button-container">
-                <button onclick="loadGraph('regular')">Regular View</button>
-                <button onclick="loadGraph('adjusted')">Adjusted View</button>
+              <button onclick="loadGraph('regular')">Regular View</button>
+              <button onclick="loadGraph('adjusted')">Adjusted View</button>
             </div>
 
             <div id="graph-wrapper">
-                <div id="graph"></div>
+              <div id="graph"></div>
             </div>
+          </div>
 
-            <script>
-                const graphs = {{
-                    regular: {datasource_one},
-                    adjusted: {datasource_two}
-                }};
+          <script>
+            const graphs = {{
+                regular: {datasource_one},
+                adjusted: {datasource_two}
+            }};
 
-                function loadGraph(view) {{
-                    const graphData = graphs[view];
-                    const layout = Object.assign({{}}, graphData.layout || {{}}, {{
-                        autosize: true,
-                        height: 600,
-                        dragmode:false,
-                    }});
-                    Plotly.newPlot(
-                        'graph',
-                        graphData.data,
-                        layout,
-                        {{
-                            responsive: true,
-                            displayModeBar: true,
-                            scrollZoom: false
-                        }}
-                    );
-                }}
-
-                // Re-draw on window resize to respect responsive behavior
-                window.addEventListener('resize', () => {{
-                    const current = document.querySelector('#graph .plotly');
-                    if (current && window._lastView) {{
-                        loadGraph(window._lastView);
-                    }}
+            function loadGraph(view) {{
+                window._lastView = view;
+                const graphData = graphs[view];
+                const layout = Object.assign({{}}, graphData.layout || {{}}, {{
+                    autosize: true,
+                    height: 600,
+                    dragmode: 'pan'  // allow dragging to pan
                 }});
+                Plotly.newPlot(
+                    'graph',
+                    graphData.data,
+                    layout,
+                    {{
+                        responsive: true,
+                        displayModeBar: false, // hide toolbar
+                        scrollZoom: false,     // disable wheel zoom
+                        doubleClick: false     // prevent double-click zoom/reset
+                    }}
+                );
+            }}
 
-                // Track last view for resize
-                const originalLoadGraph = loadGraph;
-                loadGraph = function(view) {{
-                    window._lastView = view;
-                    originalLoadGraph(view);
+            // Redraw on resize preserving current view
+            window.addEventListener('resize', () => {{
+                if (window._lastView) {{
+                    loadGraph(window._lastView);
                 }}
+            }});
 
-                // Load default view
-                loadGraph('regular');
-            </script>
+            // Initial
+            loadGraph('regular');
+          </script>
         </body>
         </html>
         """
