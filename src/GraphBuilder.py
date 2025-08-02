@@ -147,22 +147,30 @@ class GraphBuilder:
 
     @staticmethod
     def build_html(datasource_one: json, datasource_two: json):
-        """Build Graph String"""
+        """Build Graph String with responsive 100% width and max 600px height"""
         return f"""
         <!DOCTYPE html>
         <html>
         <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
             <title>Fund Performance Graphs</title>
             <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
             <style>
+                body {{
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                }}
                 #button-container {{
                     display: flex;
-                    justify-content: flex-end;
+                    justify-content: flex-start;
+                    position: relative;
+                    left:80px;
+                    top: 50px;
+                    z-index: 1;
                     gap: 10px;
-                    margin-bottom: 10px;
+                    margin: 0;
                     padding: 10px;
                 }}
-
                 #button-container button {{
                     padding: 8px 16px;
                     background-color: #007BFF;
@@ -171,17 +179,26 @@ class GraphBuilder:
                     border-radius: 4px;
                     cursor: pointer;
                     font-size: 16px;
-                    font-family: Arial, sans-serif;
                 }}
-
                 #button-container button:hover {{
                     background-color: #0056b3;
                 }}
-
-                #graph {{
+                #graph-wrapper {{
                     width: 100%;
-                    max-width: 1280px;
+                    max-width: 100%;
                     margin: auto;
+                    box-sizing: border-box;
+                    padding: 10px;
+                }}
+                #graph {{
+                    width: 100% !important;
+                    height: 600px;
+                    max-height: 600px;
+                }}
+                @media (max-width: 700px) {{
+                    #graph {{
+                        height: 400px; /* optional: adapt height on small screens */
+                    }}
                 }}
             </style>
         </head>
@@ -191,7 +208,9 @@ class GraphBuilder:
                 <button onclick="loadGraph('adjusted')">Adjusted View</button>
             </div>
 
-            <div id="graph"></div>
+            <div id="graph-wrapper">
+                <div id="graph"></div>
+            </div>
 
             <script>
                 const graphs = {{
@@ -201,7 +220,36 @@ class GraphBuilder:
 
                 function loadGraph(view) {{
                     const graphData = graphs[view];
-                    Plotly.newPlot('graph', graphData.data, graphData.layout || {{}});
+                    const layout = Object.assign({{}}, graphData.layout || {{}}, {{
+                        autosize: true,
+                        height: 600,
+                        dragmode:false,
+                    }});
+                    Plotly.newPlot(
+                        'graph',
+                        graphData.data,
+                        layout,
+                        {{
+                            responsive: true,
+                            displayModeBar: true,
+                            scrollZoom: false
+                        }}
+                    );
+                }}
+
+                // Re-draw on window resize to respect responsive behavior
+                window.addEventListener('resize', () => {{
+                    const current = document.querySelector('#graph .plotly');
+                    if (current && window._lastView) {{
+                        loadGraph(window._lastView);
+                    }}
+                }});
+
+                // Track last view for resize
+                const originalLoadGraph = loadGraph;
+                loadGraph = function(view) {{
+                    window._lastView = view;
+                    originalLoadGraph(view);
                 }}
 
                 // Load default view

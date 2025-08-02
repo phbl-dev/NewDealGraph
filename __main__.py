@@ -170,7 +170,7 @@ def generate_graph(
                     "l": 10,
                     "r": 10,
                 },  # padding around whole button group
-                "font": {"size": 18, "family": "verdana"},  # make buttons larger
+                "font": {"size": 14, "family": "verdana"},  # make buttons larger
                 "xanchor": "center",
                 "yanchor": "top",
                 # optionally add spacing between buttons by adding spaces in labels
@@ -202,7 +202,7 @@ def generate_graph(
             "borderwidth": 1,
         },
         width=1280,
-        height=840,
+        height=600,
         margin={"t": 140},
     )
 
