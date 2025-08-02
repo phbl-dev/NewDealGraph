@@ -160,7 +160,7 @@ def generate_graph(
                 "type": "buttons",
                 "direction": "right",
                 "x": 0.5,
-                "y": -0.1,
+                "y": -0.15,
                 "showactive": True,
                 "active": 3,
                 "buttons": buttons,

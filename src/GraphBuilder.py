@@ -164,8 +164,8 @@ class GraphBuilder:
                     display: flex;
                     justify-content: flex-start;
                     position: relative;
-                    left:80px;
-                    top: 50px;
+                    left:90px;
+                    top: 60px;
                     z-index: 1;
                     gap: 10px;
                     margin: 0;
@@ -194,11 +194,6 @@ class GraphBuilder:
                     width: 100% !important;
                     height: 600px;
                     max-height: 600px;
-                }}
-                @media (max-width: 700px) {{
-                    #graph {{
-                        height: 400px; /* optional: adapt height on small screens */
-                    }}
                 }}
             </style>
         </head>
