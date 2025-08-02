@@ -12,11 +12,10 @@ class DataProcessing:
         return [(v - start_value) / start_value * 100 for v in values]
 
     @staticmethod
-    def calculate_rise(label, data: List[FundReturn]):
-        pm_filtered = DataProcessing.filter_by_timespan(data, label)
-        if pm_filtered:
-            start_val = pm_filtered[0]["nav"]
-            end_val = pm_filtered[-1]["nav"]
+    def calculate_rise(data: List[FundReturn]):
+        if data:
+            start_val = data[0]["nav"]
+            end_val = data[-1]["nav"]
             pct_change = (end_val - start_val) / start_val * 100
             sign = "🟢" if pct_change >= 0 else "🔴"
             pct_str = f"{sign} {pct_change:+.1f}%"

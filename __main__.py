@@ -4,9 +4,14 @@ import plotly.graph_objects as go
 
 from plotly.utils import PlotlyJSONEncoder
 
-from src import DataCollector as DC, DataProcessing as DP, FundReturn, GraphBuilder as GB
+from src import (
+    DataCollector as DC,
+    DataProcessing as DP,
+    FundReturn,
+    GraphBuilder as GB,
+)
 
-
+@staticmethod
 def generate_graph(
     datasource_one: Optional[List[FundReturn]] = None,
     datasource_two: Optional[List[FundReturn]] = None,
@@ -26,113 +31,6 @@ def generate_graph(
 
     time_labels = ["3M", "6M", "YTD", "12M", "24M", "MAX"]
     fig = go.Figure()
-
-    for _, label in enumerate(time_labels):
-        pm_filtered = DP.filter_by_timespan(datasource_one, label)
-        ndx_filtered = DP.filter_by_timespan(datasource_two, label)
-
-        if show_adjusted:
-            pm_adjusted = DP.calculate_adjusted(pm_filtered)
-            pm_plot = [
-                {**item, "nav": adj} for item, adj in zip(pm_filtered, pm_adjusted)
-            ]
-            ndx_adjusted = DP.calculate_adjusted(ndx_filtered)
-
-            ndx_plot = [
-                {**item, "nav": adj} for item, adj in zip(ndx_filtered, ndx_adjusted)
-            ]
-
-            # Get PMINDI starting value for alignment
-            pmindi_start_value = pm_plot[0]["nav"] if pm_plot else None
-
-            # Calculate PMINDI percentage changes for hover text
-            pm_values = [item["nav"] for item in pm_plot]
-            pm_pct_changes = DP.calculate_percentage(pm_values)
-            pm_hover_text = [f"{val:.2f} kr ({pct:+.1f}%)" for val, pct in zip(pm_values, pm_pct_changes)]
-
-            GB.add_fund_trace(
-                fig,
-                pm_plot,
-                "PMINDI.CO",
-                "purple",
-                show_dividends=False,
-                visible=(label == "12M"),
-                custom_hover_text=pm_hover_text,
-            )
-
-            # For NDX: calculate percentage changes and offset by PMINDI starting value
-            ndx_navs = [item["nav"] for item in ndx_plot]
-            ndx_pct = DP.calculate_percentage(ndx_navs)
-            
-            # Offset percentage values to start at PMINDI's starting point
-            if pmindi_start_value:
-                ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
-            else:
-                ndx_pct_offset = ndx_pct
-                
-            ndx_pct_plot = [
-                {**item, "nav": pct} for item, pct in zip(ndx_plot, ndx_pct_offset)
-            ]
-
-            # Create hover text showing only percentage changes for NDX
-            ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
-
-            GB.add_fund_trace(
-                fig,
-                ndx_pct_plot,
-                "NASDAQ",
-                "black",
-                show_dividends=False,
-                visible=(label == "12M"),
-                custom_hover_text=ndx_hover_text,
-            )
-
-        else:
-            # Get PMINDI starting value for alignment
-            pmindi_start_value = pm_filtered[0]["nav"] if pm_filtered else None
-
-            # Calculate PMINDI percentage changes for hover text
-            pm_values = [item["nav"] for item in pm_filtered]
-            pm_pct_changes = DP.calculate_percentage(pm_values)
-            pm_hover_text = [f"{val:.2f} kr ({pct:+.1f}%)" for val, pct in zip(pm_values, pm_pct_changes)]
-
-            GB.add_fund_trace(
-                fig,
-                pm_filtered,
-                "PMINDI.CO",
-                "purple",
-                show_dividends=True,
-                visible=(label == "12M"),
-                custom_hover_text=pm_hover_text,
-            )
-
-            # For NDX: calculate percentage changes and offset by PMINDI starting value
-            ndx_navs = [item["nav"] for item in ndx_filtered]
-            ndx_pct = DP.calculate_percentage(ndx_navs)
-            
-            # Offset percentage values to start at PMINDI's starting point
-            if pmindi_start_value:
-                ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
-            else:
-                ndx_pct_offset = ndx_pct
-                
-            ndx_pct_plot = [
-                {**item, "nav": pct} for item, pct in zip(ndx_filtered, ndx_pct_offset)
-            ]
-            
-            # Create hover text showing only percentage changes for NDX
-            ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
-            
-            GB.add_fund_trace(
-                fig,
-                ndx_pct_plot,
-                "NASDAQ",
-                "black",
-                show_dividends=False,
-                visible=(label == "12M"),
-                custom_hover_text=ndx_hover_text,
-            )
-
     buttons = []
     for i, label in enumerate(time_labels):
         TRACES_PER_LABEL = 4
@@ -141,7 +39,9 @@ def generate_graph(
         visibility = [
             base <= idx < base + TRACES_PER_LABEL for idx in range(TOTAL_TRACES)
         ]
-        pct_str = DP.calculate_rise(label, datasource_one)
+        pct_str = DP.calculate_rise(
+            add_graph(datasource_one, datasource_two, show_adjusted, fig, label)
+        )
 
         buttons.append(
             {
@@ -169,11 +69,10 @@ def generate_graph(
                     "b": 10,
                     "l": 10,
                     "r": 10,
-                },  # padding around whole button group
-                "font": {"size": 14, "family": "verdana"},  # make buttons larger
+                },  
+                "font": {"size": 14, "family": "verdana"},
                 "xanchor": "center",
                 "yanchor": "top",
-                # optionally add spacing between buttons by adding spaces in labels
             },
         ],
         xaxis=dict(
@@ -207,6 +106,114 @@ def generate_graph(
     )
 
     return fig
+
+@staticmethod
+def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
+    pm_filtered = DP.filter_by_timespan(datasource_one, label)
+    ndx_filtered = DP.filter_by_timespan(datasource_two, label)
+
+    if show_adjusted:
+        pm_adjusted = DP.calculate_adjusted(pm_filtered)
+        pm_plot = [{**item, "nav": adj} for item, adj in zip(pm_filtered, pm_adjusted)]
+        ndx_adjusted = DP.calculate_adjusted(ndx_filtered)
+
+        ndx_plot = [
+            {**item, "nav": adj} for item, adj in zip(ndx_filtered, ndx_adjusted)
+        ]
+
+        # Get PMINDI starting value for alignment
+        pmindi_start_value, pm_hover_text = calculate_alignment(pm_plot)
+
+        GB.add_fund_trace(
+            fig,
+            pm_plot,
+            "PMINDI.CO",
+            "purple",
+            show_dividends=False,
+            visible=(label == "12M"),
+            custom_hover_text=pm_hover_text,
+        )
+
+        # For NDX: calculate percentage changes and offset by PMINDI starting value
+        ndx_navs = [item["nav"] for item in ndx_plot]
+        ndx_pct = DP.calculate_percentage(ndx_navs)
+
+        # Offset percentage values to start at PMINDI's starting point
+        if pmindi_start_value:
+            ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
+        else:
+            ndx_pct_offset = ndx_pct
+
+        ndx_pct_plot = [
+            {**item, "nav": pct} for item, pct in zip(ndx_plot, ndx_pct_offset)
+        ]
+
+        # Create hover text showing only percentage changes for NDX
+        ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
+
+        GB.add_fund_trace(
+            fig,
+            ndx_pct_plot,
+            "NASDAQ",
+            "black",
+            show_dividends=False,
+            visible=(label == "12M"),
+            custom_hover_text=ndx_hover_text,
+        )
+        return pm_plot
+
+        # Get PMINDI starting value for alignment
+    pmindi_start_value, pm_hover_text = calculate_alignment(pm_filtered)
+
+    GB.add_fund_trace(
+        fig,
+        pm_filtered,
+        "PMINDI.CO",
+        "purple",
+        show_dividends=True,
+        visible=(label == "12M"),
+        custom_hover_text=pm_hover_text,
+    )
+
+    # For NDX: calculate percentage changes and offset by PMINDI starting value
+    ndx_navs = [item["nav"] for item in ndx_filtered]
+    ndx_pct = DP.calculate_percentage(ndx_navs)
+
+    # Offset percentage values to start at PMINDI's starting point
+    if pmindi_start_value:
+        ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
+    else:
+        ndx_pct_offset = ndx_pct
+
+    ndx_pct_plot = [
+        {**item, "nav": pct} for item, pct in zip(ndx_filtered, ndx_pct_offset)
+    ]
+
+    # Create hover text showing only percentage changes for NDX
+    ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
+
+    GB.add_fund_trace(
+        fig,
+        ndx_pct_plot,
+        "NASDAQ",
+        "black",
+        show_dividends=False,
+        visible=(label == "12M"),
+        custom_hover_text=ndx_hover_text,
+    )
+    return pm_filtered
+@staticmethod
+def calculate_alignment(pm_plot):
+    pmindi_start_value = pm_plot[0]["nav"] if pm_plot else None
+
+        # Calculate PMINDI percentage changes for hover text
+    pm_values = [item["nav"] for item in pm_plot]
+    pm_pct_changes = DP.calculate_percentage(pm_values)
+    pm_hover_text = [
+            f"{val:.2f} kr ({pct:+.1f}%)" for val, pct in zip(pm_values, pm_pct_changes)
+        ]
+    
+    return pmindi_start_value,pm_hover_text
 
 
 if __name__ == "__main__":

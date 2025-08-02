@@ -218,7 +218,7 @@ class GraphBuilder:
         <body>
           <div id="page-container">
             <div id="button-container">
-              <button onclick="loadGraph('regular')">Inkl. udbytte</button>
+              <button onclick="loadGraph('regular')">Med udbytte</button>
               <button onclick="loadGraph('adjusted')">Uden udbytte</button>
             </div>
 
