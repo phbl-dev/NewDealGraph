@@ -239,7 +239,9 @@ class GraphBuilder:
                 const layout = Object.assign({{}}, graphData.layout || {{}}, {{
                     autosize: true,
                     height: 600,
-                    dragmode: 'pan'  // allow dragging to pan
+                    dragmode: 'pan',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)'
                 }});
                 Plotly.newPlot(
                     'graph',
@@ -250,6 +252,7 @@ class GraphBuilder:
                         displayModeBar: false, // hide toolbar
                         scrollZoom: false,     // disable wheel zoom
                         doubleClick: false     // prevent double-click zoom/reset
+                        
                     }}
                 );
             }}
