@@ -21,7 +21,7 @@ class DataCollector:
     def get_data_yf(fund_id: str) -> List[FundReturn]:
         """Hent data omkring fonde understøttet af yfinance API"""
         data = yf.Ticker(fund_id).history(
-            start="2023-10-22", end=str(date.today()), actions=True
+            start="2023-9-22", end=str(date.today()), actions=True
         )
 
         data = data.reset_index()
