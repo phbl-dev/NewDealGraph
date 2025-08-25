@@ -11,6 +11,7 @@ from src import (
     GraphBuilder as GB,
 )
 
+
 @staticmethod
 def generate_graph(
     datasource_one: Optional[List[FundReturn]] = None,
@@ -29,7 +30,7 @@ def generate_graph(
         Plotly-figur.
     """
 
-    time_labels = ["3M", "6M", "YTD", "12M", "24M", "MAX"]
+    time_labels = ["6M", "YTD", "12M", "MAX"]
     fig = go.Figure()
     buttons = []
     for i, label in enumerate(time_labels):
@@ -45,11 +46,9 @@ def generate_graph(
 
         buttons.append(
             {
-                "label": f"{label}\u00a0\u00a0{pct_str}",
+                "label": f"{5*' '} {label}<br>{pct_str}",
                 "method": "update",
-                "args": [
-                    {"visible": visibility},
-                ],
+                "args": [{"visible": visibility}],
             }
         )
 
@@ -69,7 +68,7 @@ def generate_graph(
                     "b": 10,
                     "l": 10,
                     "r": 10,
-                },  
+                },
                 "font": {"size": 14, "family": "verdana"},
                 "xanchor": "center",
                 "yanchor": "top",
@@ -106,6 +105,7 @@ def generate_graph(
     )
 
     return fig
+
 
 @staticmethod
 def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
@@ -202,18 +202,20 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
         custom_hover_text=ndx_hover_text,
     )
     return pm_filtered
+
+
 @staticmethod
 def calculate_alignment(pm_plot):
     pmindi_start_value = pm_plot[0]["nav"] if pm_plot else None
 
-        # Calculate PMINDI percentage changes for hover text
+    # Calculate PMINDI percentage changes for hover text
     pm_values = [item["nav"] for item in pm_plot]
     pm_pct_changes = DP.calculate_percentage(pm_values)
     pm_hover_text = [
-            f"{val:.2f} kr ({pct:+.1f}%)" for val, pct in zip(pm_values, pm_pct_changes)
-        ]
-    
-    return pmindi_start_value,pm_hover_text
+        f"{val:.2f} kr ({pct:+.1f}%)" for val, pct in zip(pm_values, pm_pct_changes)
+    ]
+
+    return pmindi_start_value, pm_hover_text
 
 
 if __name__ == "__main__":
