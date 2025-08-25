@@ -163,16 +163,22 @@ class GraphBuilder:
 
               #page-container {{
                 max-width: 1280px;
+                max-height: 600px;
                 margin: 0 auto;
                 position: relative;
               }}
 
               #button-container {{
-                display: flex;         /* instead of inline */
-  flex-wrap: wrap;       /* buttons wrap nicely on small screens */
-  gap: 10px;
-  padding: 10px;
-  position: relative;    /* relative so it flows with layout */
+                position: absolute;
+                top: 90px;
+                left: 80px;
+                width: 100%;
+                display: inline;
+                justify-content: flex-start;
+                gap: 10px;
+                padding: 10px;
+                box-sizing: border-box;
+                z-index: 1;
               }}
 
               #button-container button {{
@@ -193,19 +199,18 @@ class GraphBuilder:
                 width: 100%;
                 padding: 10px;
                 box-sizing: border-box;
-                margin-top: 20px;
+                margin-top: 110px;
               }}
 
               #graph {{
                 width: 100% !important;
-                height: 60vh;
+                height: 600px;
                 max-height: 600px;
-                min-height: 300px;
               }}
 
               @media (max-width: 700px) {{
                 #graph {{
-                  height: 50vh;
+                  height: 400px;
                 }}
               }}
             </style>
