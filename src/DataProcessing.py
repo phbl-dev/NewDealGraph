@@ -50,11 +50,38 @@ class DataProcessing:
         if not data:
             return []
 
-        dividend = 0
         adjusted = []
-        for point in data:
+        cumulative_dividend_adjustment = 0.0
+
+        for i, point in enumerate(data):
             nav = point.get("nav", 0) or 0
-            if point.get("dividend", 0) > 0:
-                dividend = point.get("dividend", 0)
-            adjusted.append(nav + dividend)
+            dividend = point.get("dividend", 0) or 0
+
+            if nav == 0:
+                adjusted.append(0)
+                continue
+
+            # Hvis der er udbytte på denne dag, skal vi beregne yield baseret på GÅR'S pris
+            if dividend > 0 and i > 0:
+                # Find den foregående dags NAV (før dividend)
+                previous_nav = data[i - 1].get("nav", 0) or 0
+                if previous_nav > 0:
+                    # Beregn dividend yield baseret på PREVIOUS day's price
+                    dividend_yield = dividend / previous_nav
+                    print(
+                        f"Dividend day: Previous NAV = {previous_nav}, Dividend = {dividend}"
+                    )
+                    print(
+                        f"Dividend yield based on previous price: {dividend_yield * 100:.2f}%"
+                    )
+                    # Tilføj til kumulativ adjustment
+                    cumulative_dividend_adjustment += dividend_yield
+                    print(
+                        f"Cumulative adjustment: {cumulative_dividend_adjustment * 100:.2f}%"
+                    )
+
+            # Beregn justeret kurs
+            adjusted_nav = nav * (1 + cumulative_dividend_adjustment)
+            adjusted.append(adjusted_nav)
+
         return adjusted
