@@ -162,7 +162,9 @@ class GraphBuilder:
               }}
 
               #page-container {{
-                max-width: 1280px;                margin: 0 auto;
+                max-width: 1280px;
+                max-height: 600px;
+                margin: 0 auto;
                 position: relative;
               }}
 
@@ -171,7 +173,7 @@ class GraphBuilder:
                 top: 90px;
                 left: 80px;
                 width: 100%;
-                display: flex;
+                display: inline;
                 justify-content: flex-start;
                 gap: 10px;
                 padding: 10px;
@@ -202,14 +204,13 @@ class GraphBuilder:
 
               #graph {{
                 width: 100% !important;
-                height: 60vh;
-                min-height: 300px;
+                height: 600px;
                 max-height: 600px;
               }}
 
               @media (max-width: 700px) {{
                 #graph {{
-                  height: 50vh;
+                  height: 400px;
                 }}
               }}
             </style>
@@ -237,6 +238,7 @@ class GraphBuilder:
                 const graphData = graphs[view];
                 const layout = Object.assign({{}}, graphData.layout || {{}}, {{
                     autosize: true,
+                    height: 600,
                     dragmode: false,
                     plot_bgcolor: 'rgba(0,0,0,0)',
                     paper_bgcolor: 'rgba(0,0,0,0)'
