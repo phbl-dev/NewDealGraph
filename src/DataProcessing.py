@@ -45,7 +45,7 @@ class DataProcessing:
         return [item for item in data if item["date_obj"] >= cutoff]
 
     @staticmethod
-    def calculate_adjusted(data):
+    def  calculate_adjusted(data):
         """Calculate adjusted close including dividends (forward approach)"""
         if not data:
             return []
