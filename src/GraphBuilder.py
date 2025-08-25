@@ -157,55 +157,62 @@ class GraphBuilder:
             <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
             <style>
               body {{
-  margin: 0;
-  font-family: Arial, sans-serif;
-}}
+                margin: 0;
+                font-family: Arial, sans-serif;
+              }}
 
-#page-container {{
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 10px;
-  box-sizing: border-box;
-}}
+              #page-container {{
+                max-width: 1280px;
+                max-height: 600px;
+                margin: 0 auto;
+                position: relative;
+              }}
 
-#button-container {{
-  display: flex;
-  flex-wrap: wrap;              /* allow wrapping on smaller screens */
-  justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;          /* space below buttons */
-}}
+              #button-container {{
+                position: absolute;
+                top: 90px;
+                left: 80px;
+                width: 100%;
+                display: inline;
+                justify-content: flex-start;
+                gap: 10px;
+                padding: 10px;
+                box-sizing: border-box;
+                z-index: 1;
+              }}
 
-#button-container button {{
-  padding: 8px 16px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}}
+              #button-container button {{
+                padding: 8px 16px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+              }}
 
-#button-container button:hover {{
-  background-color: #0056b3;
-}}
+              #button-container button:hover {{
+                background-color: #0056b3;
+              }}
 
-#graph-wrapper {{
-  width: 100%;
-  box-sizing: border-box;
-}}
+              #graph-wrapper {{
+                width: 100%;
+                padding: 10px;
+                box-sizing: border-box;
+                margin-top: 110px;
+              }}
 
-#graph {{
-  width: 100% !important;
-  height: 600px;
-  max-height: 600px;
-}}
-@media (max-width: 700px) {{
-  #graph {{
-    height: 400px;
-  }}
-}}
+              #graph {{
+                width: 100% !important;
+                height: 600px;
+                max-height: 600px;
+              }}
 
+              @media (max-width: 700px) {{
+                #graph {{
+                  height: 400px;
+                }}
+              }}
             </style>
         </head>
         <body>
