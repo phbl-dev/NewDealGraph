@@ -235,20 +235,8 @@ class GraphBuilder:
                 adjusted: {datasource_two}
             }};
             
-            function resizeButtons() {{
-  const w = document.getElementById("graph").offsetWidth;
-  const direction = w < 500 ? "down" : "right";
+  
 
-  Plotly.relayout("graph", {{
-    "updatemenus[0].direction": direction,
-    "updatemenus[0].x": 0.5,
-    "updatemenus[0].xanchor": "center",
-    "updatemenus[0].y": -0.25
-  }});
-}}
-
-
-window.addEventListener("resize", resizeButtons);
 
 
             function loadGraph(view) {{
@@ -273,12 +261,11 @@ window.addEventListener("resize", resizeButtons);
                         
                     }}
                 );
-                resizeButtons();
             }}
 
             // Initial
+            
             loadGraph('regular');
-            resizeButtons(); // run once at load
 
           </script>
         </body>
