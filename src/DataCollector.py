@@ -11,12 +11,13 @@ class DataCollector:
     @staticmethod
     def get_data_mf(fund_id: str) -> List[FundReturn]:
         """Hent data omkring fonde understøttet af FundMarket"""
-        url = f"https://node-api.fundmarket.dk/funds/ninfo/{fund_id}"
-        response = requests.get(url, timeout=1000)
-        data = response.json()["returns"]
-
-        return data
-
+        try:
+            url = f"https://node-api.fundmarket.dk/funds/ninfo/{fund_id}"
+            response = requests.get(url, timeout=1000)
+            data = response.json()["returns"]
+            return data
+        except  TimeoutError:
+            return None
     @staticmethod
     def get_data_yf(fund_id: str) -> List[FundReturn]:
         """Hent data omkring fonde understøttet af yfinance API"""
