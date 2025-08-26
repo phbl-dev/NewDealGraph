@@ -171,15 +171,14 @@ class GraphBuilder:
               #button-container {{
                 position: relative;
                 top: 90px;
-                left: 80px;
                 width: 100%;
-                display: inline;
+                display: flexbox;
                 justify-content: flex-start;
                 gap: 10px;
                 padding: 10px;
                 box-sizing: border-box;
                 z-index: 1;
-              }}
+      }}
 
               #button-container button {{
                 padding: 8px 16px;
@@ -199,9 +198,8 @@ class GraphBuilder:
 
               #graph-wrapper {{
                 width: 100%;
-                padding: 10px;
                 box-sizing: border-box;
-                margin-top: 110px;
+                margin-top: 50px;
               }}
 
               #graph {{
@@ -236,6 +234,22 @@ class GraphBuilder:
             }};
             
   
+      function resizeButtons() {{
+        const width = window.innerWidth; // better than screen.width
+        let fontSize;
+
+        if (width > 1000) {{
+          fontSize = 18;
+        }} else if (width > 700) {{
+          fontSize = 14;
+        }} else {{
+          fontSize = 10;
+        }}
+
+        Plotly.relayout("graph", {{
+          "updatemenus[0].font.size": fontSize,
+        }});
+      }}
 
 
 
@@ -264,7 +278,7 @@ class GraphBuilder:
             }}
 
             // Initial
-            
+            window.addEventListener("resize", resizeButtons)
             loadGraph('regular');
 
           </script>

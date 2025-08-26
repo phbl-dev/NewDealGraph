@@ -53,6 +53,7 @@ def generate_graph(
                 "label": f"{5*' '} {label}<br>{pct_str}",
                 "method": "update",
                 "args": [{"visible": visibility}],
+                
             }
         )
 
@@ -70,10 +71,10 @@ def generate_graph(
                 "pad": {
                     "t": 5,
                     "b": 5,
-                    "l": 5,
-                    "r": 5,
+                    "l": 3,
+                    "r": 3,
                 },
-                "font": {"size": 12, "family": "verdana"},
+                "font": {"size": 10, "family": "verdana"},
                 "xanchor": "center",
                 "yanchor": "top",
             },
@@ -103,7 +104,7 @@ def generate_graph(
             "xanchor": "center",
             "yanchor": "top",
             "bgcolor": "rgba(255,255,255,0.5)",
-            "bordercolor": "gray",
+            "bordercolor": "rgba(128, 0, 128, 1)",
             "borderwidth": 1,
         },
         autosize=True,
