@@ -1,4 +1,5 @@
 import json
+import math
 from typing import List, Optional
 import plotly.graph_objects as go
 
@@ -29,6 +30,9 @@ def generate_graph(
     Returns:
         Plotly-figur.
     """
+
+    ymin = math.floor(min([p["value"] for p in datasource_one]) * 0.9) or 0
+    ymax = math.floor(max([p["value"] for p in datasource_one]) * 1.1) or 0
 
     time_labels = ["6M", "YTD", "12M", "MAX"]
     fig = go.Figure()
@@ -75,18 +79,21 @@ def generate_graph(
             },
         ],
         xaxis=dict(
-            tickmode="array",
+            tickmode="auto",
             tickvals=tickvals,
             ticktext=ticktext,
+            nticks=6,
             tickangle=-45,
             showgrid=False,
         ),
-        yaxis={
-            "title": "Kurs",
-            "hoverformat": ".2f",
-            "showgrid": False,
-            "side": "right",
-        },
+        yaxis=dict(
+            title="Kurs",
+            hoverformat=".2f",
+            showgrid=False,
+            side="right",
+            rangemode="tozero",  # optional safeguard
+            range=[ymin, ymax],
+        ),
         plot_bgcolor="white",
         hovermode="x unified",
         legend={
