@@ -273,6 +273,7 @@ window.addEventListener("resize", resizeButtons);
                         
                     }}
                 );
+                resizeButtons();
             }}
 
             // Initial
