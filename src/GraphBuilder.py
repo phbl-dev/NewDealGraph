@@ -169,7 +169,7 @@ class GraphBuilder:
               }}
 
               #button-container {{
-                position: absolute;
+                position: relative;
                 top: 90px;
                 left: 80px;
                 width: 100%;
@@ -190,6 +190,8 @@ class GraphBuilder:
                 cursor: pointer;
                 font-size: 16px;
               }}
+              
+              
 
               #button-container button:hover {{
                 background-color: #0056b3;
@@ -232,6 +234,22 @@ class GraphBuilder:
                 regular: {datasource_one},
                 adjusted: {datasource_two}
             }};
+            
+            function resizeButtons() {{
+  const w = document.getElementById("graph").offsetWidth;
+  const direction = w < 500 ? "down" : "right";
+
+  Plotly.relayout("graph", {{
+    "updatemenus[0].direction": direction,
+    "updatemenus[0].x": 0.5,
+    "updatemenus[0].xanchor": "center",
+    "updatemenus[0].y": -0.25
+  }});
+}}
+
+
+window.addEventListener("resize", resizeButtons);
+
 
             function loadGraph(view) {{
                 window._lastView = view;
@@ -257,15 +275,10 @@ class GraphBuilder:
                 );
             }}
 
-            // Redraw on resize preserving current view
-            window.addEventListener('resize', () => {{
-                if (window._lastView) {{
-                    loadGraph(window._lastView);
-                }}
-            }});
-
             // Initial
             loadGraph('regular');
+            resizeButtons(); // run once at load
+
           </script>
         </body>
         </html>
