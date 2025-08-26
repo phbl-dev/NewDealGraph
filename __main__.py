@@ -52,7 +52,7 @@ def generate_graph(
             {
                 "label": f"{5*' '} {label}<br>{pct_str}",
                 "method": "update",
-                "args": [{"visible": visibility}],
+                "args":  [{"visible": visibility}],
                 
             }
         )
