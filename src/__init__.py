@@ -8,4 +8,5 @@ __all__ = [
     "DataCollector",
     "DataProcessing",
     "GraphBuilder",
+    "infobox"
 ]

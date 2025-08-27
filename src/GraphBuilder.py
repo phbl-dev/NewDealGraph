@@ -227,16 +227,16 @@ class GraphBuilder:
             </div>
           </div>
 
-          <script>
-            const graphs = {{
-                regular: {datasource_one},
-                adjusted: {datasource_two}
-            }};
-            
-  
-      function resizeButtons() {{
-        const width = window.innerWidth; // better than screen.width
-        let fontSize;
+        <script>
+          const graphs = {{
+              regular: {datasource_one},
+              adjusted: {datasource_two}
+          }};
+          
+
+          function resizeButtons() {{
+            const width = window.innerWidth;
+            let fontSize;
 
         if (width > 1000) {{
           fontSize = 18;
@@ -246,40 +246,61 @@ class GraphBuilder:
           fontSize = 10;
         }}
 
-        Plotly.relayout("graph", {{
-          "updatemenus[0].font.size": fontSize,
-        }});
-      }}
+            Plotly.relayout("graph", {{
+              "updatemenus[0].font.size": fontSize,
+            }});
+            
+            // Ensure buttons align with graph after resize
+            alignButtonsWithGraph();
+          }}
 
+          function alignButtonsWithGraph() {{
+            // Wait for Plotly to finish rendering
+            setTimeout(() => {{
+              const graphDiv = document.getElementById('graph');
+              const buttonContainer = document.getElementById('button-container');
+              
+              if (graphDiv && buttonContainer) {{
+                // Get the actual plot area margins from Plotly
+                const fullLayout = graphDiv._fullLayout;
+                if (fullLayout && fullLayout.margin) {{
+                  const leftMargin = fullLayout.margin.l || 80;
+                  buttonContainer.style.paddingLeft = `${{leftMargin}}px`;
+                }}
+              }}
+            }}, 100);
+          }}
 
+          function loadGraph(view) {{
+              window._lastView = view;
+              const graphData = graphs[view];
+              const layout = Object.assign({{}}, graphData.layout || {{}}, {{
+                  autosize: true,
+                  height: 600,
+                  dragmode: false,
+                  plot_bgcolor: 'rgba(0,0,0,0)',
+                  paper_bgcolor: 'rgba(0,0,0,0)'
+              }});
+              
+              Plotly.newPlot(
+                  'graph',
+                  graphData.data,
+                  layout,
+                  {{
+                      responsive: true,
+                      displayModeBar: false, // hide toolbar
+                      scrollZoom: false,     // disable wheel zoom
+                      doubleClick: false     // prevent double-click zoom/reset
+                  }}
+              ).then(() => {{
+                  resizeButtons();
+                  alignButtonsWithGraph();
+              }});
+          }}
 
-            function loadGraph(view) {{
-                window._lastView = view;
-                const graphData = graphs[view];
-                const layout = Object.assign({{}}, graphData.layout || {{}}, {{
-                    autosize: true,
-                    height: 600,
-                    dragmode: false,
-                    plot_bgcolor: 'rgba(0,0,0,0)',
-                    paper_bgcolor: 'rgba(0,0,0,0)'
-                }});
-                Plotly.newPlot(
-                    'graph',
-                    graphData.data,
-                    layout,
-                    {{
-                        responsive: true,
-                        displayModeBar: false, // hide toolbar
-                        scrollZoom: false,     // disable wheel zoom
-                        doubleClick: false     // prevent double-click zoom/reset
-                        
-                    }}
-                );
-            }}
-
-            // Initial
-            window.addEventListener("resize", resizeButtons)
-            loadGraph('regular');
+          // Event listeners
+          window.addEventListener("resize", resizeButtons);
+          loadGraph('regular');
 
           </script>
         </body>
