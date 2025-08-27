@@ -151,6 +151,5 @@ def create_box_html(div_date:str, div_amount:str, div_percent) -> str:
 </html>
     """
 
-# Write the HTML file
-# with open("box.html", "w", encoding="utf-8") as f:
-#     f.write(create_box_html())
+with open("box.html", "w", encoding="utf-8") as f:
+    f.write(create_box_html("22. jan","38.9", "25.5%"))
