@@ -52,8 +52,7 @@ def generate_graph(
             {
                 "label": f"{5*' '} {label}<br>{pct_str}",
                 "method": "update",
-                "args":  [{"visible": visibility}],
-                
+                "args": [{"visible": visibility}],
             }
         )
 
@@ -212,6 +211,142 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
 
 
 @staticmethod
+def create_box_html() -> str:
+    return f"""
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }}
+      .rectangle {{
+            width: 600px;
+            height: 75px;
+            border: 1px solid #F4F4F4;
+            background-color: #F4F4F4;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }}
+      .group {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }}
+      .left_info {{
+        display: flex;
+        flex-direction: column;
+      }}
+      .right_info {{
+        display: flex;
+        flex-direction: column;
+        text-align: right;
+      }}
+      .percentage {{
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+        color: #333;
+      }}
+      .image {{
+        width: 40px;
+        opacity: 70%;
+      }}
+      .amount {{
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+        color: #333;
+      }}
+      .date-info {{
+        font-size: 12px;
+        margin: 2px 0 0 0;
+        color: #666;
+      }}
+      .return-info {{
+        font-size: 12px;
+        margin: 2px 0 0 0;
+      }}
+
+/* Tooltip container */
+      .tooltip {{
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+      }}
+
+      .tooltip .tooltiptext {{
+        visibility: hidden;
+        width: 250px;
+        background-color: #555;
+        color: #fff;
+        text-align: left;
+        padding: 5px 10px;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 1;
+        top: 125%; /* below the button */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        white-space: normal;
+        word-wrap: break-word;
+      }}
+
+      /* Arrow pointing up */
+      .tooltip .tooltiptext::before {{
+        content: "";
+        position: absolute;
+        top: -5px; /* above the tooltip box */
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent #555 transparent; /* arrow pointing up */
+      }}
+
+      .tooltip:hover .tooltiptext {{
+        visibility: visible;
+        opacity: 1;
+      }}
+    </style>
+  </head>
+  <body>
+      <div class="rectangle">
+        <div class="group">
+          <img class="image" src="./calendar-solid-full.svg">
+          <div class="left_info">
+            <h4 class="amount">38.9 DKK/andel</h4>
+            <p class="date-info">X-dag 22. jun</p>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="right_info">
+            <h4 class="percentage">21%</h4>
+            <p class="return-info">Udbytte</p>
+          </div>
+          <div class="tooltip">
+            <img class="image" src="./circle-info-solid-full.svg">
+            <span class="tooltiptext"> Udbyttet fragik kursen den 22. januar 2025. Udlodningen skete på baggrund af et samlet afkast i 2024 på 46 %, og er baseret på ligningslovens krav til minimumsudlodning. Udbyttet er opgjort til 38,90 kr./andel.</span>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
+    """
+
+
+@staticmethod
 def calculate_alignment(pm_plot):
     pmindi_start_value = pm_plot[0]["nav"] if pm_plot else None
 
@@ -240,3 +375,6 @@ if __name__ == "__main__":
 
     with open("fund_performance_toggle.html", "w", encoding="UTF-8") as f:
         f.write(GB.build_html(fig_regular_json, fig_adjusted_json))
+
+    with open("box.html", "w", encoding="utf-8") as f:
+        f.write(create_box_html())
