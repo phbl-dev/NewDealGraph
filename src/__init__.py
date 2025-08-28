@@ -7,6 +7,5 @@ __all__ = [
     "FundReturn",
     "DataCollector",
     "DataProcessing",
-    "GraphBuilder",
-    "infobox"
+    "GraphBuilder"
 ]
