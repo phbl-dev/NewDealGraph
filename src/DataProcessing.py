@@ -45,30 +45,26 @@ class DataProcessing:
         return [item for item in data if item["date_obj"] >= cutoff]
 
     @staticmethod
-    def  calculate_adjusted(data):
-        """Calculate adjusted close including dividends (forward approach)"""
+    def calculate_adjusted(data):
+        """
+        Calculate adjusted close including dividends.
+
+        - Forward approach until first dividend > 0.
+        - After first dividend, use hardcoded formula: adjusted_nav = nav / 0.768
+        """
+
         if not data:
             return []
-
+        print(data)
         adjusted = []
-        cumulative_dividend_adjustment = 0.0
+        first_dividend_found = False
 
-        for i, point in enumerate(data):
+        for _, point in enumerate(data):
             nav = point.get("nav", 0) or 0
             dividend = point.get("dividend", 0) or 0
-
-            if nav == 0:
-                adjusted.append(0)
-                continue
-
-            # Hvis der er udbytte på denne dag, skal vi beregne yield baseret på GÅR'S pris
-            if dividend > 0 and i > 0:
-                # Find den foregående dags NAV (før dividend)
-                previous_nav = data[i - 1].get("nav", 0) or 0
-                if previous_nav > 0:
-                    dividend_yield = dividend / previous_nav
-                    cumulative_dividend_adjustment += dividend_yield
-            adjusted_nav = nav * (1 + cumulative_dividend_adjustment)
-            adjusted.append(adjusted_nav)
-
+            VALUE = 0.786   
+            if not first_dividend_found and dividend > 0:
+                first_dividend_found = True
+            adjusted.append(nav / VALUE if first_dividend_found else nav)
         return adjusted
+

@@ -7,3 +7,4 @@ class FundReturn(TypedDict):
     nav: float
     dividend: float
     value: float
+    adjusted: float

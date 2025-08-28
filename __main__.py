@@ -115,87 +115,53 @@ def generate_graph(
 
 @staticmethod
 def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
+    """
+    Adds PMINDI and NDX traces to a plotly figure.
+
+    - PMINDI: optionally adjusted.
+    - NDX: uses adjusted values only if show_adjusted=True.
+    """
+    # Filter by timespan
     pm_filtered = DP.filter_by_timespan(datasource_one, label)
     ndx_filtered = DP.filter_by_timespan(datasource_two, label)
 
+    # PMINDI adjusted values if requested
     if show_adjusted:
         pm_adjusted = DP.calculate_adjusted(pm_filtered)
         pm_plot = [{**item, "nav": adj} for item, adj in zip(pm_filtered, pm_adjusted)]
-        ndx_adjusted = DP.calculate_adjusted(ndx_filtered)
+        # NDX uses adjusted column
+        ndx_plot = [{**item, "nav": item["adjusted"]} for item in ndx_filtered]
+    else:
+        pm_plot = pm_filtered
+        # NDX uses raw nav
+        ndx_plot = [{**item, "nav": item["nav"]} for item in ndx_filtered]
 
-        ndx_plot = [
-            {**item, "nav": adj} for item, adj in zip(ndx_filtered, ndx_adjusted)
-        ]
+    # Calculate percentage changes for NDX
+    ndx_navs = [item["nav"] for item in ndx_plot]
+    ndx_pct = DP.calculate_percentage(ndx_navs)
 
-        # Get PMINDI starting value for alignment
-        pmindi_start_value, pm_hover_text = calculate_alignment(pm_plot)
+    # Get PMINDI starting value for alignment
+    pmindi_start_value, pm_hover_text = calculate_alignment(pm_plot)
 
-        GB.add_fund_trace(
-            fig,
-            pm_plot,
-            "PMINDI.CO",
-            "purple",
-            show_dividends=False,
-            visible=(label == "12M"),
-            custom_hover_text=pm_hover_text,
-        )
-
-        # For NDX: calculate percentage changes and offset by PMINDI starting value
-        ndx_navs = [item["nav"] for item in ndx_plot]
-        ndx_pct = DP.calculate_percentage(ndx_navs)
-
-        # Offset percentage values to start at PMINDI's starting point
-        if pmindi_start_value:
-            ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
-        else:
-            ndx_pct_offset = ndx_pct
-
-        ndx_pct_plot = [
-            {**item, "nav": pct} for item, pct in zip(ndx_plot, ndx_pct_offset)
-        ]
-
-        # Create hover text showing only percentage changes for NDX
-        ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
-
-        GB.add_fund_trace(
-            fig,
-            ndx_pct_plot,
-            "NASDAQ",
-            "black",
-            show_dividends=False,
-            visible=(label == "12M"),
-            custom_hover_text=ndx_hover_text,
-        )
-        return pm_plot
-
-        # Get PMINDI starting value for alignment
-    pmindi_start_value, pm_hover_text = calculate_alignment(pm_filtered)
-
+    # Add PMINDI trace
     GB.add_fund_trace(
         fig,
-        pm_filtered,
+        pm_plot,
         "PMINDI.CO",
         "purple",
-        show_dividends=True,
+        show_dividends=not show_adjusted,
         visible=(label == "12M"),
         custom_hover_text=pm_hover_text,
     )
 
-    # For NDX: calculate percentage changes and offset by PMINDI starting value
-    ndx_navs = [item["nav"] for item in ndx_filtered]
-    ndx_pct = DP.calculate_percentage(ndx_navs)
+    # Offset NDX percentage values to start at PMINDI's starting point
+    ndx_pct_offset = (
+        [pct + pmindi_start_value for pct in ndx_pct] if pmindi_start_value else ndx_pct
+    )
 
-    # Offset percentage values to start at PMINDI's starting point
-    if pmindi_start_value:
-        ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
-    else:
-        ndx_pct_offset = ndx_pct
+    ndx_pct_plot = [{**item, "nav": pct} for item, pct in zip(ndx_plot, ndx_pct_offset)]
 
-    ndx_pct_plot = [
-        {**item, "nav": pct} for item, pct in zip(ndx_filtered, ndx_pct_offset)
-    ]
-
-    # Create hover text showing only percentage changes for NDX
+    # Hover text showing only percentage changes for NDX
     ndx_hover_text = [f"{pct:+.1f}%" for pct in ndx_pct]
 
     GB.add_fund_trace(
@@ -207,7 +173,8 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
         visible=(label == "12M"),
         custom_hover_text=ndx_hover_text,
     )
-    return pm_filtered
+
+    return pm_plot if show_adjusted else pm_filtered
 
 
 @staticmethod
@@ -257,7 +224,7 @@ def create_box_html() -> str:
         color: #333;
       }}
       .image {{
-        width: 40px;
+        width: 40px !important;
         opacity: 70%;
       }}
       .amount {{
@@ -321,9 +288,10 @@ def create_box_html() -> str:
     </style>
   </head>
   <body>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <div class="rectangle">
         <div class="group">
-          <img class="image" src="./calendar-solid-full.svg">
+        <i class="fas fa-solid fa-calendar" style="font-size: 35px; opacity: 70%;;"></i>
           <div class="left_info">
             <h4 class="amount">38.9 DKK/andel</h4>
             <p class="date-info">X-dag 22. jun</p>
@@ -336,7 +304,7 @@ def create_box_html() -> str:
             <p class="return-info">Udbytte</p>
           </div>
           <div class="tooltip">
-            <img class="image" src="./circle-info-solid-full.svg">
+        <i class="fas fa-solid fa-circle-info" style="font-size: 35px; opacity: 70%;;"></i>
             <span class="tooltiptext"> Udbyttet fragik kursen den 22. januar 2025. Udlodningen skete på baggrund af et samlet afkast i 2024 på 46 %, og er baseret på ligningslovens krav til minimumsudlodning. Udbyttet er opgjort til 38,90 kr./andel.</span>
           </div>
         </div>
