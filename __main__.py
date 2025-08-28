@@ -86,7 +86,7 @@ def generate_graph(
             showgrid=False,
         ),
         yaxis=dict(
-            title="Afkast",
+            # title="Afkast",
             hoverformat=".2f",
             showgrid=False,
             side="right",
