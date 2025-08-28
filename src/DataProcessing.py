@@ -55,7 +55,6 @@ class DataProcessing:
 
         if not data:
             return []
-        print(data)
         adjusted = []
         first_dividend_found = False
 
