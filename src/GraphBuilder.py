@@ -219,7 +219,7 @@ class GraphBuilder:
           <div id="page-container">
             <div id="button-container">
               <button onclick="loadGraph('regular')">Med udbytte</button>
-              <button onclick="loadGraph('adjusted')">Uden udbytte</button>
+              <button onclick="loadGraph('adjusted')">Totalafkast</button>
             </div>
 
             <div id="graph-wrapper">
@@ -300,7 +300,7 @@ class GraphBuilder:
 
           // Event listeners
           window.addEventListener("resize", resizeButtons);
-          loadGraph('regular');
+          loadGraph('adjusted');
 
           </script>
         </body>

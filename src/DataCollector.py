@@ -16,7 +16,6 @@ class DataCollector:
             response = requests.get(url, timeout=1000)
             data = response.json()["returns"]
             
-            print(data)
             return data
         except TimeoutError:
             return None

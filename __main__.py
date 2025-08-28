@@ -55,7 +55,6 @@ def generate_graph(
                 "args": [{"visible": visibility}],
             }
         )
-
     tickvals, ticktext = GB.format_dates(datasource_one)
     fig.update_layout(
         updatemenus=[
@@ -150,7 +149,7 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
         "PMINDI.CO",
         "purple",
         show_dividends=not show_adjusted,
-        visible=(label == "12M"),
+        visible=(label == "MAX"),
         custom_hover_text=pm_hover_text,
     )
 
@@ -170,7 +169,7 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
         "NASDAQ",
         "black",
         show_dividends=False,
-        visible=(label == "12M"),
+        visible=(label == "MAX"),
         custom_hover_text=ndx_hover_text,
     )
 
@@ -294,7 +293,7 @@ def create_box_html() -> str:
         <i class="fas fa-solid fa-calendar" style="font-size: 35px; opacity: 70%;;"></i>
           <div class="left_info">
             <h4 class="amount">38.9 DKK/andel</h4>
-            <p class="date-info">X-dag 22. jun</p>
+            <p class="date-info">X-dag 22. jan 2024</p>
           </div>
         </div>
 
