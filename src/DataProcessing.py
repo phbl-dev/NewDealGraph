@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import math
 from typing import List
 from src.FundReturn import FundReturn
 from dateutil.relativedelta import relativedelta
@@ -10,6 +11,69 @@ class DataProcessing:
         """Udregn percentvis ændring siden start af periode"""
         start_value = values[0]
         return [(v - start_value) / start_value * 100 for v in values]
+
+    @staticmethod
+    def calculate_adjusted(data):
+        """
+        Calculate adjusted close including dividends.
+
+        - Forward approach until first dividend > 0.
+        - After first dividend, use hardcoded formula: adjusted_nav = nav / 0.768
+        """
+
+        if not data:
+            return []
+        adjusted = []
+        first_dividend_found = False
+
+        for _, point in enumerate(data):
+            nav = point.get("nav", 0) or 0
+            dividend = point.get("dividend", 0) or 0
+            VALUE = 0.786
+            if not first_dividend_found and dividend > 0:
+                first_dividend_found = True
+            adjusted.append(nav / VALUE if first_dividend_found else nav)
+        return adjusted
+    @staticmethod
+    def calculate_yaxis_range(
+        datasource_one: List[FundReturn],
+        datasource_two: List[FundReturn],
+        show_adjusted: bool,
+    ) -> tuple[float, float]:
+        """
+        Calculate y-axis range consistent with how add_graph
+        transforms data.
+        """
+        if not datasource_one or not datasource_two:
+            return 0, 0
+
+        # PMINDI
+        if show_adjusted:
+            pm_adjusted = DataProcessing.calculate_adjusted(datasource_one)
+            pm_plot = [adj for adj in pm_adjusted]
+        else:
+            pm_plot = [p["nav"] for p in datasource_one]
+
+        # Starting point for alignment
+        pmindi_start_value = pm_plot[0]
+
+        # NASDAQ
+        if show_adjusted:
+            ndx_plot = [p["adjusted"] for p in datasource_two]
+        else:
+            ndx_plot = [p["nav"] for p in datasource_two]
+
+        ndx_pct = DataProcessing.calculate_percentage(ndx_plot)
+        ndx_pct_offset = [pct + pmindi_start_value for pct in ndx_pct]
+
+        # Collect values actually shown
+        values = pm_plot + ndx_pct_offset
+
+        ymin = math.floor(min(values) * 0.9)
+        ymax = math.ceil(max(values) * 1.1)
+
+        return ymin, ymax
+
 
     @staticmethod
     def calculate_rise(data: List[FundReturn]):
@@ -44,26 +108,4 @@ class DataProcessing:
 
         return [item for item in data if item["date_obj"] >= cutoff]
 
-    @staticmethod
-    def calculate_adjusted(data):
-        """
-        Calculate adjusted close including dividends.
-
-        - Forward approach until first dividend > 0.
-        - After first dividend, use hardcoded formula: adjusted_nav = nav / 0.768
-        """
-
-        if not data:
-            return []
-        adjusted = []
-        first_dividend_found = False
-
-        for _, point in enumerate(data):
-            nav = point.get("nav", 0) or 0
-            dividend = point.get("dividend", 0) or 0
-            VALUE = 0.786   
-            if not first_dividend_found and dividend > 0:
-                first_dividend_found = True
-            adjusted.append(nav / VALUE if first_dividend_found else nav)
-        return adjusted
-
+    
