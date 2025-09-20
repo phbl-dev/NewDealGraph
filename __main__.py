@@ -31,8 +31,7 @@ def generate_graph(
         Plotly-figur.
     """
 
-    ymin = math.floor(min([p["value"] for p in datasource_one]) * 0.9) or 0
-    ymax = math.floor(max([p["value"] for p in datasource_one]) * 1.1) or 0
+    ymin, ymax = DP.calculate_yaxis_range(datasource_one, datasource_two, show_adjusted)
 
     time_labels = ["6M", "YTD", "12M", "MAX"]
     fig = go.Figure()
