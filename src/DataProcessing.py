@@ -1,8 +1,8 @@
 from datetime import date, datetime
 import math
 from typing import List
-from src.FundReturn import FundReturn
 from dateutil.relativedelta import relativedelta
+from src.FundReturn import FundReturn
 
 
 class DataProcessing:
