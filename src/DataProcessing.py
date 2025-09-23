@@ -102,7 +102,7 @@ class DataProcessing:
             months = int(t[:-1])
             cutoff = today - relativedelta(months=months)
         elif t == "YTD":
-            cutoff = date(today.year, 1, 1)
+            cutoff = date(today.year, 1, 1) - relativedelta(days=1)
         else:
             cutoff = date.min
 

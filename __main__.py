@@ -1,5 +1,4 @@
 import json
-import math
 from typing import List, Optional
 import plotly.graph_objects as go
 from src.HTMLBuilder import HTMLBuilder
