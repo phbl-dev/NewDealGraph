@@ -4,8 +4,15 @@ from typing import List
 from dateutil.relativedelta import relativedelta
 from src.FundReturn import FundReturn
 
+    
+DIVIDEND_FACTORS = [
+        0.786,
+        0.782
+    ]
+    
 
 class DataProcessing:
+    
     @staticmethod
     def calculate_percentage(values):
         """Udregn percentvis ændring siden start af periode"""
@@ -18,22 +25,27 @@ class DataProcessing:
         Calculate adjusted close including dividends.
 
         - Forward approach until first dividend > 0.
-        - After first dividend, use hardcoded formula: adjusted_nav = nav / 0.768
         """
 
         if not data:
             return []
         adjusted = []
-        first_dividend_found = False
-
+        
+        cumulative_factor = 1.0
+        dividend_index = 0
+        
         for _, point in enumerate(data):
             nav = point.get("nav", 0) or 0
             dividend = point.get("dividend", 0) or 0
-            VALUE = 0.786
-            if not first_dividend_found and dividend > 0:
-                first_dividend_found = True
-            adjusted.append(nav / VALUE if first_dividend_found else nav)
+            
+            if dividend > 0 and dividend_index < len(DIVIDEND_FACTORS):
+                cumulative_factor *= DIVIDEND_FACTORS[dividend_index]
+            
+            adjusted.append(nav / cumulative_factor)
+
         return adjusted
+    
+    
     @staticmethod
     def calculate_yaxis_range(
         datasource_one: List[FundReturn],
@@ -50,7 +62,7 @@ class DataProcessing:
         # PMINDI
         if show_adjusted:
             pm_adjusted = DataProcessing.calculate_adjusted(datasource_one)
-            pm_plot = [adj for adj in pm_adjusted]
+            pm_plot = list(pm_adjusted)
         else:
             pm_plot = [p["nav"] for p in datasource_one]
 
