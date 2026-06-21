@@ -6,8 +6,8 @@ class HTMLRenderer:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def render_chart_page(regular_json: str, adjusted_json: str) -> str:
-        """Return a full HTML document embedding two Plotly graphs."""
+    def render_chart_page(regular_json: str, adjusted_json: str, akk_json: str) -> str:
+        """Return a full HTML document embedding three Plotly graphs."""
         return f"""\
 <!DOCTYPE html>
 <html>
@@ -42,16 +42,17 @@ class HTMLRenderer:
 
     #button-container button {{
       padding: 8px 16px;
-      background-color: #007BFF;
+      background-color: #1B3C76;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      transition: background-color 0.15s;
     }}
 
     #button-container button:hover {{
-      background-color: #0056b3;
+      background-color: #142d59;
     }}
 
     #graph-wrapper {{
@@ -74,8 +75,9 @@ class HTMLRenderer:
 <body>
   <div id="page-container">
     <div id="button-container">
-      <button onclick="loadGraph('regular')">Med udbytte</button>
-      <button onclick="loadGraph('adjusted')">Totalafkast</button>
+      <button onclick="loadGraph('regular')">PMINDI (Med udbytte)</button>
+      <button onclick="loadGraph('adjusted')">PMINDI (Totalafkast)</button>
+      <button onclick="loadGraph('akk')">PMINDIAKK</button>
     </div>
 
     <div id="graph-wrapper">
@@ -86,7 +88,8 @@ class HTMLRenderer:
   <script>
     const graphs = {{
       regular:  {regular_json},
-      adjusted: {adjusted_json}
+      adjusted: {adjusted_json},
+      akk:      {akk_json}
     }};
 
     function getResponsiveFontSize() {{
@@ -106,6 +109,23 @@ class HTMLRenderer:
       }}, 100);
     }}
 
+    function styleActiveButton() {{
+      // Plotly renders updatemenu buttons as SVG <rect> elements.
+      // The active button has class "active" on its parent <g>.
+      // Inactive = transparent, active = #1B3C76 with white text.
+      setTimeout(() => {{
+        const graphDiv = document.getElementById("graph");
+        if (!graphDiv) return;
+        graphDiv.querySelectorAll(".updatemenu-button").forEach(btn => {{
+          const rect = btn.querySelector("rect");
+          if (!rect) return;
+          const isActive = btn.classList.contains("active");
+          rect.style.fill = isActive ? "#1B3C76" : "transparent";
+          rect.style.stroke = "transparent";
+        }});
+      }}, 120);
+    }}
+
     function loadGraph(view) {{
       window._lastView = view;
       const graphData = graphs[view];
@@ -123,7 +143,10 @@ class HTMLRenderer:
         displayModeBar: false,
         scrollZoom:     false,
         doubleClick:    false
-      }}).then(alignButtonsWithGraph);
+      }}).then(() => {{
+        alignButtonsWithGraph();
+        styleActiveButton();
+      }});
     }}
 
     window.addEventListener("resize", () => {{

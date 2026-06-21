@@ -99,7 +99,7 @@ class ChartBuilder:
                 x=0.5, y=1.12,
                 xanchor="center", yanchor="top",
                 bgcolor="rgba(255,255,255,0.5)",
-                bordercolor="rgba(128, 0, 128, 1)",
+                bordercolor="#1B3C76",
                 borderwidth=1,
             ),
             autosize=True,
@@ -118,11 +118,23 @@ class ChartBuilder:
         cfg: TraceConfig,
         anchor: Optional[float],
     ) -> List[FundReturn]:
-        """Return a copy of *data* with nav replaced according to *cfg*."""
+        """Return a copy of *data* with nav replaced according to *cfg*.
+
+        Transform order:
+          1. Resolve the base value series (raw nav / YF adjusted / PMINDI adjusted).
+          2. If use_percentage_offset, express as % change anchored to *anchor*.
+        """
+        # Step 1: resolve base values
         if cfg.use_adjusted:
+            # PMINDI: dividend-corrected total-return NAV
             adj = self._calc.adjusted_nav(data)
             data = [{**item, "nav": v} for item, v in zip(data, adj)]
-        elif cfg.use_percentage_offset and anchor is not None:
+        elif cfg.use_yf_adjusted:
+            # Benchmark: use the pre-computed "adjusted" column from Yahoo Finance
+            data = [{**item, "nav": item["adjusted"]} for item in data]
+
+        # Step 2: apply percentage offset so the benchmark aligns with PMINDI's scale
+        if cfg.use_percentage_offset and anchor is not None:
             navs = [item["nav"] for item in data]
             pcts = self._calc.percentage_changes(navs)
             data = [{**item, "nav": pct + anchor} for item, pct in zip(data, pcts)]
@@ -232,16 +244,20 @@ class ChartBuilder:
         }
 
     @staticmethod
-    def _updatemenus_config(buttons: list) -> dict:
+    def _updatemenus_config(buttons: list, active_index: int = 3) -> dict:
+        # Default buttons are transparent with white text.
+        # The active button is coloured #1B3C76 via styleActiveButton() in the JS.
         return {
             "type": "buttons",
             "direction": "right",
             "x": 0.5, "y": -0.3,
             "showactive": True,
-            "active": 3,
+            "active": active_index,
             "buttons": buttons,
             "pad": {"t": 5, "b": 5, "l": 3, "r": 3},
-            "font": {"size": 10, "family": "verdana"},
+            "font": {"size": 10, "family": "verdana", "color": "white"},
+            "bgcolor": "rgba(0,0,0,0)",
+            "bordercolor": "rgba(0,0,0,0)",
             "xanchor": "center",
             "yanchor": "top",
         }

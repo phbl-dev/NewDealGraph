@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -9,8 +8,10 @@ class TraceConfig:
     label: str
     color: str
     show_dividends: bool = False
-    # If True, NAV is expressed as a % change anchored to the primary series.
+    # Express values as % change anchored to the primary series' starting NAV.
     use_percentage_offset: bool = False
-    # If True, the adjusted column (total return) is used instead of NAV.
+    # Use the dividend-corrected adjusted_nav() calculation (PMINDI only).
     use_adjusted: bool = False
+    # Use the pre-computed "adjusted" column from Yahoo Finance (benchmark only).
+    use_yf_adjusted: bool = False
     fill_to_zero: bool = False
