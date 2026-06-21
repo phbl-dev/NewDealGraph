@@ -12,8 +12,6 @@ from src import (
     GraphBuilder as GB,
 )
 
-
-@staticmethod
 def generate_graph(
     datasource_one: Optional[List[FundReturn]] = None,
     datasource_two: Optional[List[FundReturn]] = None,
@@ -110,8 +108,6 @@ def generate_graph(
 
     return fig
 
-
-@staticmethod
 def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
     """
     Adds PMINDI and NDX traces to a plotly figure.
@@ -174,8 +170,6 @@ def add_graph(datasource_one, datasource_two, show_adjusted, fig, label):
 
     return pm_plot if show_adjusted else pm_filtered
 
-
-@staticmethod
 def calculate_alignment(pm_plot):
     pmindi_start_value = pm_plot[0]["nav"] if pm_plot else None
 
