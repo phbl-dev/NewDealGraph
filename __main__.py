@@ -45,20 +45,20 @@ PMINDIAKK = TraceConfig(
 
 NASDAQ_REGULAR = TraceConfig(
     label="NASDAQ",
-    color="#000000",
+    color="#ffffff",
     use_percentage_offset=True,
 )
 
 NASDAQ_ADJUSTED = TraceConfig(
     label="NASDAQ",
-    color="#000000",
+    color="#ffffff",
     use_percentage_offset=True,
     use_yf_adjusted=True,   # read item["adjusted"] (YF pre-computed), then % offset
 )
 
 NASDAQ_AKK = TraceConfig(
     label="NASDAQ",
-    color="#000000",
+    color="#ffffff",
     use_percentage_offset=True,
 )
 
@@ -99,10 +99,13 @@ def main() -> None:
     # --- Infrastructure
     pm_source  = FundMarketDataSource(timeout=30)
     yf_source  = YahooFinanceDataSource(start_date="2023-09-22")
+    
+    yf_source_akk  = YahooFinanceDataSource(start_date="2025-03-07")
 
     pm_data  = pm_source.fetch("1198")
-    akk_data = pm_source.fetch("1228")   # FundMarket id for the acc. share class
     ndx_data = yf_source.fetch("QQQ")
+    ndx_data_akk = yf_source_akk.fetch("QQQ")
+    akk_data = pm_source.fetch("1228")
 
     # --- Application
     calculator = ReturnsCalculator()
@@ -110,7 +113,7 @@ def main() -> None:
 
     fig_regular  = builder.build(pm_data,  ndx_data, PMINDI_REGULAR,  NASDAQ_REGULAR)
     fig_adjusted = builder.build(pm_data,  ndx_data, PMINDI_ADJUSTED, NASDAQ_ADJUSTED)
-    fig_akk      = builder.build(akk_data, ndx_data, PMINDIAKK,       NASDAQ_AKK)
+    fig_akk      = builder.build(akk_data, ndx_data_akk, PMINDIAKK,       NASDAQ_AKK)
 
     regular_json  = _to_json(fig_regular)
     adjusted_json = _to_json(fig_adjusted)
