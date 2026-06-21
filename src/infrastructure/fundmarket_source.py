@@ -11,7 +11,7 @@ class FundMarketDataSource(FundDataSource):
 
     _BASE_URL = "https://node-api.fundmarket.dk/funds/ninfo"
 
-    def __init__(self, timeout: int = 10) -> None:
+    def __init__(self, timeout: int = 60) -> None:
         self._timeout = timeout
 
     def fetch(self, fund_id: str) -> List[FundReturn]:
