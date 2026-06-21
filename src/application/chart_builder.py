@@ -70,7 +70,7 @@ class ChartBuilder:
             self._add_trace(fig, pm_plot, primary_cfg, visible=(label == "MAX"), hover=pm_hover)
             self._add_trace(fig, bm_plot, benchmark_cfg, visible=(label == "MAX"), hover=bm_hover)
 
-            rise_label = self._calc.total_return_label(pm_filtered)
+            rise_label = self._calc.total_return_label(pm_plot)
             buttons.append(self._make_button(label, rise_label, visibility))
 
         tickvals, ticktext = self._format_date_axis(primary)
