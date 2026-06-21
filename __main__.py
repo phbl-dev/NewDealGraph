@@ -100,12 +100,12 @@ def main() -> None:
     pm_source  = FundMarketDataSource(timeout=30)
     yf_source  = YahooFinanceDataSource(start_date="2023-09-22")
     
-    yf_source_akk  = YahooFinanceDataSource(start_date="2025-03-07")
+    yf_source_akk  = YahooFinanceDataSource(start_date="2025-12-05")
 
     pm_data  = pm_source.fetch("1198")
     ndx_data = yf_source.fetch("QQQ")
     ndx_data_akk = yf_source_akk.fetch("QQQ")
-    akk_data = pm_source.fetch("1228")
+    akk_data = pm_source.fetch("1251")
 
     # --- Application
     calculator = ReturnsCalculator()
