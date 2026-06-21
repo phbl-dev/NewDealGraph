@@ -97,7 +97,7 @@ def _write(path: Path, content: str) -> None:
 
 def main() -> None:
     # --- Infrastructure
-    pm_source  = FundMarketDataSource(timeout=10)
+    pm_source  = FundMarketDataSource(timeout=30)
     yf_source  = YahooFinanceDataSource(start_date="2023-09-22")
 
     pm_data  = pm_source.fetch("1198")
