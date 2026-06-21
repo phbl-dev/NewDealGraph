@@ -33,8 +33,9 @@ class HTMLRenderer:
       top: 90px;
       width: 100%;
       display: flex;
+      flex-wrap: wrap;
       justify-content: flex-start;
-      gap: 10px;
+      gap: 8px;
       padding: 10px;
       box-sizing: border-box;
       z-index: 1;
@@ -42,17 +43,22 @@ class HTMLRenderer:
 
     #button-container button {{
       padding: 8px 16px;
-      background-color: #1B3C76;
-      color: white;
+      background-color: white;
+      color: #1B3C76;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.15s;
+      transition: background-color 0.15s, color 0.15s;
     }}
 
     #button-container button:hover {{
-      background-color: #142d59;
+      background-color: #e8edf5;
+    }}
+
+    #button-container button.active {{
+      background-color: #1B3C76;
+      color: white;
     }}
 
     #graph-wrapper {{
@@ -68,6 +74,8 @@ class HTMLRenderer:
     }}
 
     @media (max-width: 700px) {{
+      #button-container {{ top: 60px; gap: 6px; }}
+      #button-container button {{ font-size: 13px; padding: 6px 10px; }}
       #graph {{ height: 400px; }}
     }}
   </style>
@@ -75,9 +83,9 @@ class HTMLRenderer:
 <body>
   <div id="page-container">
     <div id="button-container">
-      <button onclick="loadGraph('regular')">PMINDI (Med udbytte)</button>
-      <button onclick="loadGraph('adjusted')">PMINDI (Totalafkast)</button>
-      <button onclick="loadGraph('akk')">PMINDIAKK</button>
+      <button onclick="loadGraph('regular', this)">PMINDI (Med udbytte)</button>
+      <button onclick="loadGraph('adjusted', this)">PMINDI (Totalafkast)</button>
+      <button onclick="loadGraph('akk', this)">PMINDIAKK</button>
     </div>
 
     <div id="graph-wrapper">
@@ -109,25 +117,45 @@ class HTMLRenderer:
       }}, 100);
     }}
 
-    function styleActiveButton() {{
-      // Plotly renders updatemenu buttons as SVG <rect> elements.
-      // The active button has class "active" on its parent <g>.
-      // Inactive = transparent, active = #1B3C76 with white text.
-      setTimeout(() => {{
-        const graphDiv = document.getElementById("graph");
-        if (!graphDiv) return;
-        graphDiv.querySelectorAll(".updatemenu-button").forEach(btn => {{
-          const rect = btn.querySelector("rect");
-          if (!rect) return;
-          const isActive = btn.classList.contains("active");
-          rect.style.fill = isActive ? "#1B3C76" : "transparent";
-          rect.style.stroke = "transparent";
-        }});
-      }}, 120);
+    function applyButtonStyles() {{
+      const graphDiv = document.getElementById("graph");
+      if (!graphDiv) return;
+      graphDiv.querySelectorAll(".updatemenu-button").forEach(btn => {{
+        const rect = btn.querySelector("rect");
+        const text = btn.querySelector("text");
+        if (!rect) return;
+        const isActive = btn.classList.contains("active");
+        rect.setAttribute("fill",         isActive ? "#1B3C76" : "white");
+        rect.setAttribute("stroke",       "#1B3C76");
+        rect.setAttribute("stroke-width", "1.5");
+        if (text) text.setAttribute("fill", isActive ? "white" : "#1B3C76");
+      }});
     }}
 
-    function loadGraph(view) {{
+    function styleActiveButton() {{
+      setTimeout(applyButtonStyles, 120);
+    }}
+
+    function attachButtonClickListeners() {{
+      const graphDiv = document.getElementById("graph");
+      if (!graphDiv) return;
+      graphDiv.querySelectorAll(".updatemenu-button").forEach(btn => {{
+        btn.addEventListener("click", () => setTimeout(applyButtonStyles, 80));
+      }});
+    }}
+
+    function setActiveTopButton(view) {{
+      document.querySelectorAll("#button-container button").forEach(btn => {{
+        btn.classList.remove("active");
+        if (btn.getAttribute("onclick") && btn.getAttribute("onclick").includes("'" + view + "'")) {{
+          btn.classList.add("active");
+        }}
+      }});
+    }}
+
+    function loadGraph(view, clickedBtn) {{
       window._lastView = view;
+      setActiveTopButton(view);
       const graphData = graphs[view];
       const layout = Object.assign({{}}, graphData.layout || {{}}, {{
         autosize: true,
@@ -146,6 +174,7 @@ class HTMLRenderer:
       }}).then(() => {{
         alignButtonsWithGraph();
         styleActiveButton();
+        attachButtonClickListeners();
       }});
     }}
 

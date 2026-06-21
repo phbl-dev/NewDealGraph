@@ -255,9 +255,9 @@ class ChartBuilder:
             "active": active_index,
             "buttons": buttons,
             "pad": {"t": 5, "b": 5, "l": 3, "r": 3},
-            "font": {"size": 10, "family": "verdana", "color": "white"},
-            "bgcolor": "rgba(0,0,0,0)",
-            "bordercolor": "rgba(0,0,0,0)",
+            "font": {"size": 10, "family": "verdana", "color": "#1B3C76"},
+            "bgcolor": "rgba(255,255,255,0.85)",
+            "bordercolor": "#1B3C76",
             "xanchor": "center",
             "yanchor": "top",
         }
